@@ -72,7 +72,11 @@ const haLightDevice = neeoapi.buildDevice('Light')
   }, controller.discoverScripts)
   .registerInitialiseFunction(controller.initialise);
 
-function startSdkExample(brain) {
+  module.exports = {
+    devices: [haLightDevice, haSwitchDevice, haSceneDevice, haScriptDevice]
+  };
+
+/*function startSdkExample(brain) {
   console.log('- Start server');
   neeoapi.startServer({
     brain,
@@ -101,3 +105,4 @@ if (brainIp) {
       startSdkExample(brain);
     });
 }
+*/

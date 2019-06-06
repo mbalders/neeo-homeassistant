@@ -4,6 +4,23 @@ const debug = require('debug')('neeo:homeassistant:service');
 const BluePromise = require('bluebird');
 const rp = require('request-promise');
 
+
+const packageFile = require(process.cwd() + '/package.json');
+const sdkOptions = packageFile.neeoSdkOptions || {};
+
+if (sdkOptions.HA_URL == undefined) {
+  console.log('[HOMEASSISTANT URL] No URL address defined. package.json -> sdkOptions -> HA_URL');
+}
+
+if (sdkOptions.HA_PASSWORD == undefined) {
+  console.log('[HOMEASSISTANT PASSWORD] No PASSWORD address defined. package.json -> sdkOptions -> HA_PASSWORD');
+}
+
+const HA_URL = sdkOptions.HA_URL;
+const HA_PASSWORD = sdkOptions.HA_PASSWORD;
+
+
+
 // Load config from env
 require('dotenv').load();
 
@@ -24,12 +41,12 @@ const SUPPORTED_ENTITY_TYPES = 'light|switch|scene|script';
 class HAService {
   constructor(deviceState) {
     // Check env is set
-    if (!process.env.HA_URL) {
+    if (!HA_URL) {
       console.error('ERROR! ENV is not setup, no HA_URL');
       process.exit(1);
     }
 
-    console.log('Home Assistant service started for URL: ' + process.env.HA_URL);
+    console.log('Home Assistant service started for URL: ' + HA_URL);
 
     this.deviceState = deviceState;
     debug('starting service discovery');
@@ -48,12 +65,12 @@ class HAService {
 
     let options = {
       method: 'POST',
-      uri: process.env.HA_URL + '/api/services/' + service + '/' + action,
+      uri: HA_URL + '/api/services/' + service + '/' + action,
       body: {
         entity_id: entity_id
       },
       json: true,
-      headers: { 'x-ha-access': process.env.HA_PASSWORD }
+      headers: { 'x-ha-access': HA_PASSWORD }
     };
 
     console.log("Using options", options);
@@ -85,9 +102,9 @@ class HAService {
     function getStatePromise() {
 
       let options = {
-        uri: process.env.HA_URL + '/api/states/' + entity_id,
+        uri: HA_URL + '/api/states/' + entity_id,
         json: true,
-        headers: { 'x-ha-access': process.env.HA_PASSWORD }
+        headers: { 'x-ha-access': HA_PASSWORD }
       };
 
       return rp(options).then(function (response) {
@@ -113,9 +130,9 @@ class HAService {
    */
   discoverDevices() {
     let options = {
-      uri: process.env.HA_URL + '/api/states',
+      uri: HA_URL + '/api/states',
       json: true,
-      headers: { 'x-ha-access': process.env.HA_PASSWORD }
+      headers: { 'x-ha-access': HA_PASSWORD }
     };
 
     rp(options)
